@@ -1,5 +1,6 @@
 {
   "name": "z-schema",
+  "version": "2.5.0",
   "description": "JSON schema validator",
   "homepage": "https://github.com/zaggino/z-schema",
   "keywords": [
@@ -40,7 +41,6 @@
     "LICENSE",
     "README.md"
   ],
-  "version": "2.4.6",
   "dependencies": {
     "bluebird": "~1.0.5",
     "request": "~2.34.0",
@@ -50,6 +50,8 @@
     "random-seed": "~0.1.0"
   },
   "devDependencies": {
+    "es5-shim": "latest",
+    "express": "latest",
     "chai": "latest",
     "grunt": "~0.4.2",
     "grunt-contrib-uglify": "latest",
