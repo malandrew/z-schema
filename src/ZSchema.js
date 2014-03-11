@@ -340,7 +340,7 @@
             });
         },
         // query should be valid json pointer
-        resolveSchemaQuery: function resolveSchemaQuery(schema, rootSchema, queryStr, allowNull, sync) {
+        resolveSchemaQuery: function resolveSchemaQuery(schema, rootSchema, queryStr, allowNull, sync, schemaCache) {
             ZSchema.expect.string(queryStr);
             if (queryStr === '#') {
                 return rootSchema;
@@ -364,6 +364,9 @@
                 } else {
                     // it's a local ID
                     rv = Utils.resolveSchemaId(rootSchema, uriPart);
+                }
+                if (!rv && this.isObject(schemaCache)) {
+                    rv = schemaCache[uriPart];
                 }
             } else {
                 rv = rootSchema;
@@ -997,7 +1000,7 @@
         function afterDownload() {
             refObjs.forEach(function (refObj) {
                 if (!refObj.__$refResolved) {
-                    refObj.__$refResolved = Utils.resolveSchemaQuery(refObj, schema, refObj.$ref, true, self.options.sync) || null;
+                    refObj.__$refResolved = Utils.resolveSchemaQuery(refObj, schema, refObj.$ref, true, self.options.sync, self.schemaCache) || null;
                 }
                 if (self.schemaCache && self.schemaCache[refObj.$ref]) {
                     refObj.__$refResolved = self.schemaCache[refObj.$ref];
@@ -1040,7 +1043,7 @@
             schema = rootSchema;
         }
         if (schema.$ref && schema.__$refResolved !== null && schema.$ref.indexOf('http:') !== 0 && schema.$ref.indexOf('https:') !== 0) {
-            schema.__$refResolved = Utils.resolveSchemaQuery(schema, rootSchema, schema.$ref, true, this.options.sync) || null;
+            schema.__$refResolved = Utils.resolveSchemaQuery(schema, rootSchema, schema.$ref, true, this.options.sync, this.schemaCache) || null;
         }
         Utils.forEach(schema, function (val, key) {
             if (typeof key === 'string' && key.indexOf('__') === 0) {
@@ -1200,7 +1203,7 @@
             if (schema.__$refResolved) {
                 schema = schema.__$refResolved;
             } else {
-                schema = Utils.resolveSchemaQuery(schema, report.rootSchema, schema.$ref, false, self.options.sync);
+                schema = Utils.resolveSchemaQuery(schema, report.rootSchema, schema.$ref, false, self.options.sync, self.schemaCache);
             }
             maxRefs--;
         }
