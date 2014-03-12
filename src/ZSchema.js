@@ -585,77 +585,85 @@
         this.warnings = [];
         this.path = [];
     };
-    Report.prototype = {
-        getPath: function () {
-            var path = ['#'];
 
-            if (this.parentReport) {
-                path = path.concat(this.parentReport.path);
-            }
-            path = path.concat(this.path);
+    Report.prototype.getPath = function () {
+        var path = ['#'];
 
-            if (path.length == 1) {
-                return '#/';
-            }
-
-            return path.join('/');
-        },
-        addWarning: function (message) {
-            this.warnings.push({
-                message: message,
-                path: this.getPath()
-            });
-            return true;
-        },
-        addError: function (code, params, subReports) {
-            var err = ValidationError.createError(code, params, this.getPath());
-            if (subReports) {
-                subReports.forEach(function (report) {
-                    report.errors.forEach(function (_err) {
-                        err.addSubError(_err);
-                    }, this);
-                }, this);
-            }
-            this.errors.push(err);
-            return false;
-        },
-        expect: function (bool, code, params, subReports) {
-            if (!bool) {
-                this.addError(code, params, subReports);
-                return false;
-            } else {
-                return true;
-            }
-        },
-        isValid: function () {
-            return this.errors.length === 0;
-        },
-        toJSON: function () {
-            return {
-                valid: this.errors.length === 0,
-                errors: this.errors,
-                warnings: this.warnings
-            };
-        },
-        toError: function () {
-            var err = new Error('Validation failed');
-            err.errors = this.errors;
-            err.warnings = this.warnings;
-            return err;
-        },
-        toPromise: function () {
-            if (this.isValid()) {
-                return Promise.resolve(this);
-            } else {
-                return Promise.reject(this.toError());
-            }
-        },
-        goDown: function (str) {
-            this.path.push(str);
-        },
-        goUp: function () {
-            this.path.pop();
+        if (this.parentReport) {
+            path = path.concat(this.parentReport.path);
         }
+        path = path.concat(this.path);
+
+        if (path.length == 1) {
+            return '#/';
+        }
+
+        return path.join('/');
+    };
+
+    Report.prototype.addWarning = function (message) {
+        this.warnings.push({
+            message: message,
+            path: this.getPath()
+        });
+        return true;
+    };
+
+    Report.prototype.addError = function (code, params, subReports) {
+        var err = ValidationError.createError(code, params, this.getPath());
+        if (subReports) {
+            subReports.forEach(function (report) {
+                report.errors.forEach(function (_err) {
+                    err.addSubError(_err);
+                }, this);
+            }, this);
+        }
+        this.errors.push(err);
+        return false;
+    };
+
+    Report.prototype.expect = function (bool, code, params, subReports) {
+        if (!bool) {
+            this.addError(code, params, subReports);
+            return false;
+        } else {
+            return true;
+        }
+    };
+
+    Report.prototype.isValid = function () {
+        return this.errors.length === 0;
+    };
+
+    Report.prototype.toJSON = function () {
+        return {
+            valid: this.errors.length === 0,
+            errors: this.errors,
+            warnings: this.warnings
+        };
+    };
+
+    Report.prototype.toError = function () {
+        var err = new Error('Validation failed');
+        err.errors = this.errors;
+        err.warnings = this.warnings;
+        return err;
+    };
+
+    Report.prototype.toPromise = function () {
+        if (this.isValid()) {
+            return Promise.resolve(this);
+        } else {
+            return Promise.reject(this.toError());
+        }
+    };
+
+    Report.prototype.goDown = function (str) {
+        this.path.push(str);
+    };
+    
+    Report.prototype.goUp = function () {
+        this.path.pop();
     };
 
     /*
